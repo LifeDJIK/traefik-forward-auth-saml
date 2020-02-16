@@ -32,7 +32,10 @@
   },
   "auth": {
     "login_redirect_url": "https://auth.example.com/",
-    "logout_redirect_url": "https://auth.example.com/"
+    "logout_redirect_url": "https://auth.example.com/",
+    "logout_redirect_urls": [
+      "https://app.example.com"
+    ]
   },
   "saml": {
     "strict": true,

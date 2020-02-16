@@ -229,13 +229,17 @@ class RootController:  # pylint: disable=R0903
 
     @cherrypy.expose
     @cherrypy.tools.template(name="saml/saml_post.html")
-    def logout(self):  # pylint: disable=R0201,C0111
+    def logout(self, to=None):  # pylint: disable=R0201,C0111,C0103
+        # Check and set return_to
+        return_to = self.settings_auth["logout_redirect_url"]
+        if to is not None and to in self.settings_auth.get("logout_redirect_urls", list()):
+            return_to = to
         # Create logout request object
         saml_auth = OneLogin_Saml2_Auth(
             self._prepare_request_object(cherrypy.request),
             self.settings_saml
         )
-        logout_redirect_url = saml_auth.logout(return_to=self.settings_auth["logout_redirect_url"])
+        logout_redirect_url = saml_auth.logout(return_to=return_to)
         # Redirect in case of HTTP-REDIRECT binding
         if self.settings_saml.get("idp", dict()).get("singleLogoutService", dict()).get(
                 "binding", ""
