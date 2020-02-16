@@ -267,10 +267,13 @@ class RootController:  # pylint: disable=R0903
 
     @cherrypy.expose
     def saml_acs(self, *args, **kvargs):  # pylint: disable=R0201,C0111
-        logging.info("===== ACS =====")
-        logging.info("ACS args: %s", args)
-        logging.info("ACS kvargs: %s", kvargs)
-        logging.info("ACS headers: %s", cherrypy.request.headers)
+        if self.settings.get("server", dict()).get("security", dict()).get(
+                "saml_acs_sls_debug", False
+        ):
+            logging.info("===== ACS =====")
+            logging.info("ACS args: %s", args)
+            logging.info("ACS kvargs: %s", kvargs)
+            logging.info("ACS headers: %s", cherrypy.request.headers)
         #
         saml_auth = OneLogin_Saml2_Auth(
             self._prepare_request_object(cherrypy.request),
@@ -278,11 +281,14 @@ class RootController:  # pylint: disable=R0903
         )
         saml_auth.process_response()
         #
-        logging.info("ACS auth: %s", saml_auth.is_authenticated())
-        logging.info("ACS err: %s", saml_auth.get_errors())
-        logging.info("ACS attrs: %s", saml_auth.get_attributes())
-        logging.info("ACS NameID: %s", saml_auth.get_nameid())
-        logging.info("ACS SessionIndex: %s", saml_auth.get_session_index())
+        if self.settings.get("server", dict()).get("security", dict()).get(
+                "saml_acs_sls_debug", False
+        ):
+            logging.info("ACS auth: %s", saml_auth.is_authenticated())
+            logging.info("ACS err: %s", saml_auth.get_errors())
+            logging.info("ACS attrs: %s", saml_auth.get_attributes())
+            logging.info("ACS NameID: %s", saml_auth.get_nameid())
+            logging.info("ACS SessionIndex: %s", saml_auth.get_session_index())
         #
         cherrypy.session.clear()
         cherrypy.session.regenerate()
@@ -303,10 +309,13 @@ class RootController:  # pylint: disable=R0903
 
     @cherrypy.expose
     def saml_sls(self, *args, **kvargs):  # pylint: disable=R0201,C0111
-        logging.info("===== SLS =====")
-        logging.info("SLS args: %s", args)
-        logging.info("SLS kvargs: %s", kvargs)
-        logging.info("SLS headers: %s", cherrypy.request.headers)
+        if self.settings.get("server", dict()).get("security", dict()).get(
+                "saml_acs_sls_debug", False
+        ):
+            logging.info("===== SLS =====")
+            logging.info("SLS args: %s", args)
+            logging.info("SLS kvargs: %s", kvargs)
+            logging.info("SLS headers: %s", cherrypy.request.headers)
         #
         saml_auth = OneLogin_Saml2_Auth(
             self._prepare_request_object(cherrypy.request),
@@ -314,11 +323,14 @@ class RootController:  # pylint: disable=R0903
         )
         saml_auth.process_slo()
         #
-        logging.info("SLS auth: %s", saml_auth.is_authenticated())
-        logging.info("SLS err: %s", saml_auth.get_errors())
-        logging.info("SLS attrs: %s", saml_auth.get_attributes())
-        logging.info("SLS NameID: %s", saml_auth.get_nameid())
-        logging.info("SLS SessionIndex: %s", saml_auth.get_session_index())
+        if self.settings.get("server", dict()).get("security", dict()).get(
+                "saml_acs_sls_debug", False
+        ):
+            logging.info("SLS auth: %s", saml_auth.is_authenticated())
+            logging.info("SLS err: %s", saml_auth.get_errors())
+            logging.info("SLS attrs: %s", saml_auth.get_attributes())
+            logging.info("SLS NameID: %s", saml_auth.get_nameid())
+            logging.info("SLS SessionIndex: %s", saml_auth.get_session_index())
         #
         cherrypy.session.clear()
         cherrypy.session.regenerate()

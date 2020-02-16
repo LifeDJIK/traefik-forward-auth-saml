@@ -1,0 +1,73 @@
+{
+  "server": {
+    "global": {
+      "environment": "production",
+      "engine.signals.on": true,
+      "server.socket_host": "0.0.0.0",
+      "server.socket_port": 80,
+      "server.thread_pool": 8,
+      "server.max_request_body_size": 0,
+      "server.socket_timeout": 60
+    },
+    "endpoints": {
+      "root": "/",
+      "info": "/info"
+    },
+    "security": {
+      "hide_banners": true,
+      "saml_acs_sls_debug": false
+    },
+    "/": {
+      "tools.sessions.on": true,
+      "tools.sessions.name": "auth_session_id",
+      "tools.sessions.domain": "example.com",
+      "tools.sessions.httponly": true,
+      "tools.sessions.secure": true,
+      "tools.proxy.on": true,
+      "tools.proxy.local": "Host",
+      "tools.secureheaders.on": true,
+      "tools.staticdir.on": true,
+      "tools.staticdir.dir": "static"
+    }
+  },
+  "auth": {
+    "login_redirect_url": "https://auth.example.com/",
+    "logout_redirect_url": "https://auth.example.com/"
+  },
+  "saml": {
+    "strict": true,
+    "debug": false,
+    "sp": {
+      "entityId": "traefik-forward-auth-saml",
+      "assertionConsumerService": {
+        "url": "https://auth.example.com/saml_acs",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      },
+      "singleLogoutService": {
+        "url": "https://auth.example.com/saml_sls",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      },
+      "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+      "x509cert": "MI...==",
+      "privateKey": "MI...=="
+    },
+    "idp": {
+      "entityId": "https://keycloak.example.com/auth/realms/example",
+      "singleSignOnService": {
+        "url": "https://keycloak.example.com/auth/realms/example/protocol/saml",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      },
+      "singleLogoutService": {
+        "url": "https://keycloak.example.com/auth/realms/example/protocol/saml",
+        "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      },
+      "x509cert": "MI...aw"
+    },
+    "security": {
+      "authnRequestsSigned": true,
+      "logoutRequestSigned": true,
+      "signatureAlgorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+      "digestAlgorithm": "http://www.w3.org/2000/09/xmldsig#sha1"
+    }
+  }
+}
