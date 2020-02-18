@@ -119,17 +119,16 @@ class RootController:  # pylint: disable=R0903
             )
         )
         request_root.insert(0, signature_node)
-        xmlsec.template.add_transform(
-            xmlsec.template.add_reference(
-                signature_node,
-                digest_algorithm_transform_map.get(
-                    saml_security.get("digestAlgorithm", OneLogin_Saml2_Constants.SHA1),
-                    xmlsec.constants.TransformSha1
-                ),
-                uri=f"#{request_root.get('ID')}"
+        reference_node = xmlsec.template.add_reference(
+            signature_node,
+            digest_algorithm_transform_map.get(
+                saml_security.get("digestAlgorithm", OneLogin_Saml2_Constants.SHA1),
+                xmlsec.constants.TransformSha1
             ),
-            xmlsec.constants.TransformEnveloped
+            uri=f"#{request_root.get('ID')}"
         )
+        xmlsec.template.add_transform(reference_node, xmlsec.constants.TransformEnveloped)
+        xmlsec.template.add_transform(reference_node, xmlsec.constants.TransformExclC14N)
         xmlsec.template.add_x509_data(xmlsec.template.ensure_key_info(signature_node))
         signature_ctx = xmlsec.SignatureContext()
         signature_ctx.key = xmlsec.Key.from_memory(
