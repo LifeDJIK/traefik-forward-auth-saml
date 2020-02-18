@@ -118,7 +118,7 @@ class RootController:  # pylint: disable=R0903
                 xmlsec.constants.TransformRsaSha1
             )
         )
-        request_root.insert(0, signature_node)
+        request_root.insert(1, signature_node)
         reference_node = xmlsec.template.add_reference(
             signature_node,
             digest_algorithm_transform_map.get(
