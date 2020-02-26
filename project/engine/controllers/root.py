@@ -68,4 +68,6 @@ class RootController:  # pylint: disable=R0903
 
     @cherrypy.expose
     def logout(self, to=None):  # pylint: disable=R0201,C0111,C0103
-        raise cherrypy.HTTPRedirect(self.settings["auth"]["logout_handler"])
+        raise cherrypy.HTTPRedirect(
+            self.settings["auth"]["logout_handler"] + (f"?to={to}" if to is not None else "")
+        )
