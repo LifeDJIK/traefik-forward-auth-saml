@@ -1,3 +1,7 @@
+global:
+  debug: false
+
+
 server:
   global:
     environment: production
@@ -7,14 +11,6 @@ server:
     server.thread_pool: 8
     server.max_request_body_size: 0
     server.socket_timeout: 60
-
-  endpoints:
-    root: "/"
-    info: "/info"
-
-  security:
-    hide_banners: true
-    saml_acs_sls_debug: false
 
   "/":
     tools.sessions.on: true
@@ -29,10 +25,19 @@ server:
     tools.staticdir.dir: static
 
 
+endpoints:
+  root: "/"
+  saml: "/saml"
+  info: "/info"
+  access_denied: "/access_denied"
+
+
 auth:
+  login_handler: "/saml/login"
   login_redirect_url: https://auth.example.com/
+  logout_handler: "/saml/logout"
   logout_redirect_url: https://auth.example.com/
-  logout_redirect_urls:
+  logout_allowed_redirect_urls:
   - https://app.example.com
 
 

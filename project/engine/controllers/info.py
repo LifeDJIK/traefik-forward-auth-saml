@@ -26,10 +26,10 @@ import cherrypy  # pylint: disable=E0401
 class InfoController:  # pylint: disable=R0903
     """ Info controller logic """
 
-    def __init__(self, base_dir, base_path, settings):
+    def __init__(self, base_dir, base_path):
         self.base_dir = base_dir
         self.base_path = base_path
-        self.settings = settings
+        self.settings = cherrypy.config["engine.settings"]
 
     #
     # Backend auth/user info endpoint

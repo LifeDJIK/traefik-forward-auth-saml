@@ -22,73 +22,67 @@
 
 
 import os
-import logging
+
 import yaml  # pylint: disable=E0401
 import jinja2  # pylint: disable=E0401
 import cherrypy  # pylint: disable=E0401
 
-from engine.tools import jinja2_template
-from engine.tools import secure_headers
+from engine.tools import log
+from engine.cherrypy import helpers, tools, plugins
 
-cherrypy.tools.template = cherrypy.Tool("before_finalize", jinja2_template)
-cherrypy.tools.secureheaders = cherrypy.Tool("before_finalize", secure_headers, priority=60)
+cherrypy.tools.template = cherrypy.Tool("before_finalize", tools.jinja2_template)
+cherrypy.tools.secureheaders = cherrypy.Tool("before_finalize", tools.secure_headers, priority=60)
 
-from engine.plugins import Jinja2Plugin
 from engine.controllers.root import RootController
 from engine.controllers.info import InfoController
+from engine.controllers.saml import SamlController
+
 
 
 def main():
     """ Entry point """
-    # Initialize logging
-    logging.basicConfig(
-        level=logging.INFO,
-        datefmt="%Y.%m.%d %H:%M:%S %Z",
-        format="%(asctime)s - %(levelname)8s - %(name)s - %(message)s",
-    )
+    # Initialize base logging
+    log.init()
     # Load settings
     settings_file = os.environ.get("CONFIG_FILENAME", None)
     if not settings_file:
-        logging.error("Settings file path not set. Please set CONFIG_FILENAME")
+        log.error("Settings file path not set. Please set CONFIG_FILENAME")
         return
     with open(settings_file, "rb") as file:
         settings = yaml.load(file, Loader=yaml.SafeLoader)
+    # Enable debug logging if requested
+    if settings["global"]["debug"]:
+        log.init(debug_logging=True)
     # Set paths and create plugins
     base = os.path.dirname(os.path.realpath(__file__))
-    jinja2_base = os.path.join(base, "templates")
-    jinja2_plugin = Jinja2Plugin(
+    jinja2_plugin = plugins.Jinja2Plugin(
         cherrypy.engine,
-        loader=jinja2.FileSystemLoader(jinja2_base)
+        loader=jinja2.FileSystemLoader(os.path.join(base, "templates"))
     )
-    # Set config and start plugins
+    # Set config
     cherrypy.config.update({
+        "engine.settings": settings,
         "tools.staticdir.root": base,
         "tools.staticfile.root": base
     })
-    cherrypy.config.update(settings.get("server", dict()))
+    server_config = settings["server"]
+    cherrypy.config.update(server_config)
+    # Start plugins
     jinja2_plugin.subscribe()
     # Create and mount application trees
-    root_path = settings.get("server", dict()).get("endpoints", dict()).get(
-        "root", "/forward-auth"
-    )
-    root_instance = RootController(base, root_path, settings)
-    cherrypy.tree.mount(root_instance, root_path, settings.get("server", dict()))
-    #
-    info_path = settings.get("server", dict()).get("endpoints", dict()).get(
-        "info", "/forward-auth/info"
-    )
-    info_instance = InfoController(base, root_path, settings)
-    cherrypy.tree.mount(info_instance, info_path, settings.get("server", dict()))
-    # Hide banners if requested
-    if settings.get("server", dict()).get("security", dict()).get("hide_banners", False):
-        cherrypy.__version__ = ""
-        cherrypy.config.update({
-            "response.headers.server": ""
-        })
-        cherrypy._cperror._HTTPErrorTemplate = cherrypy._cperror._HTTPErrorTemplate.replace(  # pylint: disable=W0212
-            "Powered by <a href=\"http://www.cherrypy.org\">CherryPy %(version)s</a>\n",
-            ""
+    helpers.register_controller(RootController, settings["endpoints"]["root"], base, server_config)
+    helpers.register_controller(InfoController, settings["endpoints"]["info"], base, server_config)
+    if "saml" in settings:
+        helpers.register_controller(
+            SamlController, settings["endpoints"]["saml"], base, server_config
         )
+    # Set error handlers
+    cherrypy.config.update({
+        "error_page.default": helpers.error_handler,
+        "request.error_response": helpers.exception_handler,
+    })
+    # Hide banners
+    helpers.hide_banners()
     # Finally run the engine
     cherrypy.engine.start()
     cherrypy.engine.block()
