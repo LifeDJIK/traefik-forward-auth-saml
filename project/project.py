@@ -22,8 +22,8 @@
 
 
 import os
-import json
 import logging
+import yaml  # pylint: disable=E0401
 import jinja2  # pylint: disable=E0401
 import cherrypy  # pylint: disable=E0401
 
@@ -52,7 +52,7 @@ def main():
         logging.error("Settings file path not set. Please set CONFIG_FILENAME")
         return
     with open(settings_file, "rb") as file:
-        settings = json.load(file)
+        settings = yaml.load(file, Loader=yaml.SafeLoader)
     # Set paths and create plugins
     base = os.path.dirname(os.path.realpath(__file__))
     jinja2_base = os.path.join(base, "templates")
