@@ -38,7 +38,7 @@ auth:
   logout_handler: "/saml/logout"
   logout_redirect_url: https://auth.example.com/
   logout_allowed_redirect_urls:
-  - https://app.example.com
+  - https://app.example.com/
 
 
 saml:
@@ -48,10 +48,10 @@ saml:
   sp:
     entityId: traefik-forward-auth-saml
     assertionConsumerService:
-      url: https://auth.example.com/saml_acs
+      url: https://auth.example.com/saml/acs
       binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
     singleLogoutService:
-      url: https://auth.example.com/saml_sls
+      url: https://auth.example.com/saml/sls
       binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
     NameIDFormat: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
     x509cert: MI...==
@@ -70,5 +70,5 @@ saml:
   security:
     authnRequestsSigned: true
     logoutRequestSigned: true
-    signatureAlgorithm: http://www.w3.org/2000/09/xmldsig#rsa-sha1
-    digestAlgorithm: http://www.w3.org/2000/09/xmldsig#sha1
+    signatureAlgorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+    digestAlgorithm: http://www.w3.org/2001/04/xmlenc#sha256
