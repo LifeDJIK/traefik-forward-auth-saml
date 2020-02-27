@@ -2,6 +2,19 @@ global:
   debug: false
 
 
+vault:
+  url: https://vault.example.com:8200
+  ssl_verify: true
+  namespace: some/namespace
+  secrets_path: secrets
+  secrets_mount_point: kv
+  # auth_token: t...n
+  # auth_username: u..r
+  # auth_password: p......d
+  auth_role_id: r....d
+  auth_secret_id: s......d
+
+
 server:
   global:
     environment: production

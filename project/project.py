@@ -27,7 +27,7 @@ import yaml  # pylint: disable=E0401
 import jinja2  # pylint: disable=E0401
 import cherrypy  # pylint: disable=E0401
 
-from engine.tools import log
+from engine.tools import log, config
 from engine.cherrypy import helpers, tools, plugins
 
 cherrypy.tools.template = cherrypy.Tool("before_finalize", tools.jinja2_template)
@@ -49,7 +49,9 @@ def main():
         log.error("Settings file path not set. Please set CONFIG_FILENAME")
         return
     with open(settings_file, "rb") as file:
-        settings = yaml.load(file, Loader=yaml.SafeLoader)
+        settings_data = file.read()
+    settings = yaml.load(os.path.expandvars(settings_data), Loader=yaml.SafeLoader)
+    settings = config.config_substitution(settings, config.vault_secrets(settings))
     # Enable debug logging if requested
     if settings["global"]["debug"]:
         log.init(debug_logging=True)
