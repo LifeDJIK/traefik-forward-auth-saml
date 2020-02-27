@@ -218,7 +218,7 @@ class SamlController:  # pylint: disable=R0903
     @cherrypy.tools.template(name="saml/saml_post.html")
     def logout(self, to=None):  # pylint: disable=R0201,C0111,C0103
         # Check and set return_to
-        return_to = self.settings["auth"]["logout_redirect_url"]
+        return_to = self.settings["auth"]["logout_default_redirect_url"]
         if to is not None and to in self.settings["auth"]["logout_allowed_redirect_urls"]:
             return_to = to
         # Create logout request object
@@ -293,7 +293,7 @@ class SamlController:  # pylint: disable=R0903
         if "RelayState" in cherrypy.request.params and \
                 cherrypy.request.params["RelayState"] not in loop_urls:
             raise cherrypy.HTTPRedirect(cherrypy.request.params["RelayState"])
-        raise cherrypy.HTTPRedirect(self.settings["auth"]["login_redirect_url"])
+        raise cherrypy.HTTPRedirect(self.settings["auth"]["login_default_redirect_url"])
 
     @cherrypy.expose
     def sls(self, *args, **kvargs):  # pylint: disable=R0201,C0111
@@ -328,4 +328,4 @@ class SamlController:  # pylint: disable=R0903
         if "RelayState" in cherrypy.request.params and \
                 cherrypy.request.params["RelayState"] not in loop_urls:
             raise cherrypy.HTTPRedirect(cherrypy.request.params["RelayState"])
-        raise cherrypy.HTTPRedirect(self.settings["auth"]["logout_redirect_url"])
+        raise cherrypy.HTTPRedirect(self.settings["auth"]["logout_default_redirect_url"])

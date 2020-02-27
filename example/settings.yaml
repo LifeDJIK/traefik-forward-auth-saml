@@ -34,9 +34,9 @@ endpoints:
 
 auth:
   login_handler: "/saml/login"
-  login_redirect_url: https://auth.example.com/
   logout_handler: "/saml/logout"
-  logout_redirect_url: https://auth.example.com/
+  login_default_redirect_url: https://auth.example.com/
+  logout_default_redirect_url: https://auth.example.com/
   logout_allowed_redirect_urls:
   - https://app.example.com/
 
