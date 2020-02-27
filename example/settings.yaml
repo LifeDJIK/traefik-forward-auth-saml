@@ -1,5 +1,13 @@
 global:
   debug: false
+  disable_auth: false
+  # forced_info:
+  #   raw:
+  #     auth: true
+  #     auth_errors: []
+  #     auth_nameid: ""
+  #     auth_sessionindex: ""
+  #     auth_attributes: {}
 
 
 vault:

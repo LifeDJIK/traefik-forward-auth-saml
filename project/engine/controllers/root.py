@@ -20,7 +20,10 @@
     Root controller
 """
 
+import importlib
 import cherrypy  # pylint: disable=E0401
+
+from engine.tools import log
 
 
 class RootController:  # pylint: disable=R0903
@@ -38,7 +41,8 @@ class RootController:  # pylint: disable=R0903
     @cherrypy.expose
     def auth(self, target=None):  # pylint: disable=R0201,C0111
         # Check if need to login
-        if not cherrypy.session.get("auth", False):
+        if not cherrypy.session.get("auth", False) and not self.settings["global"]["disable_auth"]:
+            # Redirect to login
             for header in [
                     "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port", "X-Forwarded-Uri"
             ]:
@@ -47,16 +51,16 @@ class RootController:  # pylint: disable=R0903
             raise cherrypy.HTTPRedirect(
                 cherrypy.request.base + cherrypy.request.script_name + "/login"
             )
-        # Set headers for reply
-        if target is None or target == "raw":
-            cherrypy.response.headers["X-Auth-Session-Endpoint"] = \
-                cherrypy.request.base + self.settings["endpoints"]["info"] + "/raw"
-            cherrypy.response.headers["X-Auth-Session-Name"] = cherrypy.serving.request.config.get(
-                "tools.sessions.name",
-                "session_id"
-            )
-            cherrypy.response.headers["X-Auth-Session-Id"] = cherrypy.session.id
-        return "OK"
+        if target is None:
+            target = "raw"
+        # Map auth response
+        result = "OK"
+        try:
+            mapper = importlib.import_module(f"engine.mappers.{target}")
+            result = mapper.auth(self.settings)
+        except:  # pylint: disable=W0702
+            log.exception("Failed to map auth data")
+        return result
 
     #
     # Login/logout endpoints

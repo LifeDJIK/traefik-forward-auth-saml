@@ -20,7 +20,10 @@
     Info controller
 """
 
+import importlib
 import cherrypy  # pylint: disable=E0401
+
+from engine.tools import log
 
 
 class InfoController:  # pylint: disable=R0903
@@ -37,11 +40,18 @@ class InfoController:  # pylint: disable=R0903
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def raw(self):  # pylint: disable=R0201,C0111
+    def query(self, target=None):  # pylint: disable=R0201,C0111
+        if target is None:
+            target = "raw"
+        # Check for forced info
+        if "forced_info" in self.settings["global"] and \
+                target in self.settings["global"]["forced_info"]:
+            return self.settings["global"]["forced_info"][target]
+        # Map info for target
         result = dict()
-        result["auth"] = cherrypy.session.get("auth", False)
-        result["auth_errors"] = cherrypy.session.get("auth_errors", list())
-        result["auth_nameid"] = cherrypy.session.get("auth_nameid", "")
-        result["auth_sessionindex"] = cherrypy.session.get("auth_sessionindex", "")
-        result["auth_attributes"] = cherrypy.session.get("auth_attributes", dict())
+        try:
+            mapper = importlib.import_module(f"engine.mappers.{target}")
+            result = mapper.info(self.settings)
+        except:  # pylint: disable=W0702
+            log.exception("Failed to map info data")
         return result
