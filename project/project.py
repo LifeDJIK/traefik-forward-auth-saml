@@ -22,6 +22,7 @@
 
 
 import os
+import importlib
 
 import yaml  # pylint: disable=E0401
 import jinja2  # pylint: disable=E0401
@@ -44,12 +45,28 @@ def main():
     # Initialize base logging
     log.init()
     # Load settings
-    settings_file = os.environ.get("CONFIG_FILENAME", None)
-    if not settings_file:
-        log.error("Settings file path not set. Please set CONFIG_FILENAME")
-        return
-    with open(settings_file, "rb") as file:
-        settings_data = file.read()
+    settings_data = None
+    # Load settings from seed
+    settings_seed = os.environ.get("CONFIG_SEED", None)
+    if settings_seed and ":" in settings_seed:
+        settings_seed_tag = settings_seed[:settings_seed.find(":")]
+        settings_seed_data = settings_seed[len(settings_seed_tag)+1:]
+        try:
+            seed = importlib.import_module(f"engine.seeds.{settings_seed_tag}")
+            settings_data = seed.unseed(settings_seed_data)
+        except:  # pylint: disable=W0702
+            log.exception("Failed to unseed settings, skipping seed")
+    else:
+        log.info("Settings seed is empty or invalid, skipping")
+    # Load settings from file
+    if settings_data is None:
+        settings_file = os.environ.get("CONFIG_FILENAME", None)
+        if not settings_file:
+            log.error("Settings file path not set. Please set CONFIG_FILENAME")
+            return
+        with open(settings_file, "rb") as file:
+            settings_data = file.read()
+    # Parse settings
     settings = yaml.load(os.path.expandvars(settings_data), Loader=yaml.SafeLoader)
     settings = config.config_substitution(settings, config.vault_secrets(settings))
     # Enable debug logging if requested
