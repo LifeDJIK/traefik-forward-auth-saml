@@ -227,6 +227,9 @@ class SamlController:  # pylint: disable=R0903
             self.settings["saml"]
         )
         logout_redirect_url = saml_auth.logout(return_to=return_to)
+        # Clear session now
+        cherrypy.session.clear()
+        cherrypy.session.regenerate()
         # Redirect in case of HTTP-REDIRECT binding
         if self.settings["saml"]["idp"]["singleLogoutService"]["binding"] != \
                 "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST":
