@@ -1,0 +1,8 @@
+endpoint: minio.example.com
+# region: null
+secure: false
+ssl_verify: false
+access_key: A...Y
+secret_key: s.....y
+bucket: config
+object: auth-settings.yaml

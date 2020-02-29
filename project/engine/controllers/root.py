@@ -49,7 +49,10 @@ class RootController:  # pylint: disable=R0903
                 if header in cherrypy.request.headers:
                     cherrypy.session[header] = cherrypy.request.headers[header]
             raise cherrypy.HTTPRedirect(
-                cherrypy.request.base + cherrypy.request.script_name + "/login"
+                self.settings["auth"].get(
+                    "auth_redirect",
+                    cherrypy.request.base + cherrypy.request.script_name + "/login"
+                )
             )
         if target is None:
             target = "raw"

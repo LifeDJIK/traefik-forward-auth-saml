@@ -37,7 +37,7 @@ cherrypy.tools.secureheaders = cherrypy.Tool("before_finalize", tools.secure_hea
 from engine.controllers.root import RootController
 from engine.controllers.info import InfoController
 from engine.controllers.saml import SamlController
-
+from engine.controllers.oidc import OidcController
 
 
 def main():
@@ -94,6 +94,10 @@ def main():
     if "saml" in settings:
         helpers.register_controller(
             SamlController, settings["endpoints"]["saml"], base, server_config
+        )
+    if "oidc" in settings:
+        helpers.register_controller(
+            OidcController, settings["endpoints"]["oidc"], base, server_config
         )
     # Set error handlers
     cherrypy.config.update({

@@ -1,6 +1,7 @@
 PyYAML==5.3
+minio==5.0.7
 hvac==0.10.0
 CherryPy==18.1.2
 Jinja2==2.10.1
 python3-saml==1.9.0
-minio==5.0.7
+oic==1.2.0
