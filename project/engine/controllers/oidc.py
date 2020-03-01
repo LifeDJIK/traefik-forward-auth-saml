@@ -95,7 +95,7 @@ class OidcController:  # pylint: disable=R0903
         login_url = auth_req.request(self.client.authorization_endpoint)
         #
         if self.settings["oidc"]["debug"]:
-            log.info("OIDC login URL: %s", login_url)
+            log.warning("OIDC login URL: %s", login_url)
         #
         raise cherrypy.HTTPRedirect(login_url)
 
@@ -128,7 +128,7 @@ class OidcController:  # pylint: disable=R0903
         logout_url = end_req.request(self.client.end_session_endpoint)
         #
         if self.settings["oidc"]["debug"]:
-            log.info("Logout URL: %s", logout_url)
+            log.warning("Logout URL: %s", logout_url)
         #
         cherrypy.session.clear()
         cherrypy.session.regenerate()
@@ -158,7 +158,7 @@ class OidcController:  # pylint: disable=R0903
         )
         #
         if self.settings["oidc"]["debug"]:
-            log.info("Callback access_token_resp: %s", access_token_resp)
+            log.warning("Callback access_token_resp: %s", access_token_resp)
         #
         # userinfo = self.client.do_user_info_request(
         #     state=auth_resp["state"]
@@ -184,6 +184,6 @@ class OidcController:  # pylint: disable=R0903
         cherrypy.session["auth_attributes"] = id_token
         #
         if self.settings["oidc"]["debug"]:
-            log.info("Callback redirect URL: %s", redirect_to)
+            log.warning("Callback redirect URL: %s", redirect_to)
         #
         raise cherrypy.HTTPRedirect(redirect_to)
