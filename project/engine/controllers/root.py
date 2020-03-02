@@ -60,7 +60,7 @@ class RootController:  # pylint: disable=R0903
         result = "OK"
         try:
             mapper = importlib.import_module(f"engine.mappers.{target}")
-            result = mapper.auth(self.settings, scope)
+            result = mapper.auth(scope)
         except:  # pylint: disable=W0702
             log.exception("Failed to map auth data")
         return result

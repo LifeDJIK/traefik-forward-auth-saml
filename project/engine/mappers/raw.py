@@ -23,11 +23,11 @@
 import cherrypy  # pylint: disable=E0401
 
 
-def auth(settings, scope):
+def auth(scope):
     """ Map auth data """
     _ = scope
     cherrypy.response.headers["X-Auth-Session-Endpoint"] = \
-        cherrypy.request.base + settings["endpoints"]["info"] + "/query"
+        cherrypy.request.base + cherrypy.config["engine.settings"]["endpoints"]["info"] + "/query"
     cherrypy.response.headers["X-Auth-Session-Name"] = cherrypy.serving.request.config.get(
         "tools.sessions.name",
         "session_id"
@@ -36,9 +36,9 @@ def auth(settings, scope):
     return "OK"
 
 
-def info(settings, scope):
+def info(scope):
     """ Map info data """
-    _ = settings, scope
+    _ = scope
     result = dict()
     result["auth"] = cherrypy.session.get("auth", False)
     result["auth_errors"] = cherrypy.session.get("auth_errors", list())

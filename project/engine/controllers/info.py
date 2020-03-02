@@ -51,7 +51,7 @@ class InfoController:  # pylint: disable=R0903
         result = dict()
         try:
             mapper = importlib.import_module(f"engine.mappers.{target}")
-            result = mapper.info(self.settings, scope)
+            result = mapper.info(scope)
         except:  # pylint: disable=W0702
             log.exception("Failed to map info data")
         return result

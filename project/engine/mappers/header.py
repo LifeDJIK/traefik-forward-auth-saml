@@ -27,23 +27,22 @@ from engine.mappers import raw
 from engine.tools import log
 
 
-def auth(settings, scope):
+def auth(scope):
     """ Map auth data """
-    if scope not in settings["mappers"]["header"]:
+    if scope not in cherrypy.config["engine.settings"]["mappers"]["header"]:
         raise cherrypy.HTTPRedirect(
             cherrypy.config["engine.settings"]["endpoints"]["access_denied"]
         )
-    #
-    auth_info = info(settings, scope)
+    raw.auth(scope)  # Set "raw" headers too
+    auth_info = info(scope)
     try:
-        for header, path in settings["mappers"]["header"][scope].items():
+        for header, path in cherrypy.config["engine.settings"]["mappers"]["header"][scope].items():
             cherrypy.response.headers[header] = jsonpath_rw.parse(path).find(auth_info)[0].value
     except:  # pylint: disable=W0702
         log.exception("Failed to set scope headers")
-    #
     return "OK"
 
 
-def info(settings, scope):
+def info(scope):
     """ Map info data """
-    return raw.info(settings, scope)
+    return raw.info(scope)
