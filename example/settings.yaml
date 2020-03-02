@@ -67,7 +67,7 @@ auth:
 mappers:
   header:
     example:
-      X-WEBAUTH-USER: auth_attributes.user_name
+      X-WEBAUTH-USER: "'auth_attributes'.'user_name'"
 
 
 saml:
