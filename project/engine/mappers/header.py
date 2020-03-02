@@ -17,32 +17,33 @@
 #   limitations under the License.
 
 """
-    Mapper: raw
+    Mapper: header
 """
 
 import cherrypy  # pylint: disable=E0401
+import jsonpath_rw  # pylint: disable=E0401
+
+from engine.mappers import raw
+from engine.tools import log
 
 
 def auth(settings, scope):
     """ Map auth data """
-    _ = scope
-    cherrypy.response.headers["X-Auth-Session-Endpoint"] = \
-        cherrypy.request.base + settings["endpoints"]["info"] + "/query"
-    cherrypy.response.headers["X-Auth-Session-Name"] = cherrypy.serving.request.config.get(
-        "tools.sessions.name",
-        "session_id"
-    )
-    cherrypy.response.headers["X-Auth-Session-Id"] = cherrypy.session.id
+    if scope not in settings["mappers"]["header"]:
+        raise cherrypy.HTTPRedirect(
+            cherrypy.config["engine.settings"]["endpoints"]["access_denied"]
+        )
+    #
+    auth_info = info(settings, scope)
+    for header, path in settings["mappers"]["header"][scope]:
+        try:
+            cherrypy.response.headers[header] = jsonpath_rw.parse(path).find(auth_info)[0].value
+        except:  # pylint: disable=W0702
+            log.exception("Failed to set scope header")
+    #
     return "OK"
 
 
 def info(settings, scope):
     """ Map info data """
-    _ = settings, scope
-    result = dict()
-    result["auth"] = cherrypy.session.get("auth", False)
-    result["auth_errors"] = cherrypy.session.get("auth_errors", list())
-    result["auth_nameid"] = cherrypy.session.get("auth_nameid", "")
-    result["auth_sessionindex"] = cherrypy.session.get("auth_sessionindex", "")
-    result["auth_attributes"] = cherrypy.session.get("auth_attributes", dict())
-    return result
+    return raw.info(settings, scope)

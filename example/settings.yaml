@@ -64,6 +64,12 @@ auth:
   - https://app.example.com/
 
 
+mappers:
+  header:
+    example:
+      X-WEBAUTH-USER: auth_attributes.user_name
+
+
 saml:
   strict: true
   debug: false

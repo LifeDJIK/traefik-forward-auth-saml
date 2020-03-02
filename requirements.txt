@@ -5,3 +5,4 @@ CherryPy==18.1.2
 Jinja2==2.10.1
 python3-saml==1.9.0
 oic==1.2.0
+jsonpath-rw==1.4.0

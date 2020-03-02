@@ -39,7 +39,7 @@ class RootController:  # pylint: disable=R0903
     #
 
     @cherrypy.expose
-    def auth(self, target=None):  # pylint: disable=R0201,C0111
+    def auth(self, target=None, scope=None):  # pylint: disable=R0201,C0111
         # Check if need to login
         if not cherrypy.session.get("auth", False) and not self.settings["global"]["disable_auth"]:
             # Redirect to login
@@ -60,7 +60,7 @@ class RootController:  # pylint: disable=R0903
         result = "OK"
         try:
             mapper = importlib.import_module(f"engine.mappers.{target}")
-            result = mapper.auth(self.settings)
+            result = mapper.auth(self.settings, scope)
         except:  # pylint: disable=W0702
             log.exception("Failed to map auth data")
         return result

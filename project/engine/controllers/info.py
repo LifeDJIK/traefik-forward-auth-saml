@@ -40,7 +40,7 @@ class InfoController:  # pylint: disable=R0903
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def query(self, target=None):  # pylint: disable=R0201,C0111
+    def query(self, target=None, scope=None):  # pylint: disable=R0201,C0111
         if target is None:
             target = "raw"
         # Check for forced info
@@ -51,7 +51,7 @@ class InfoController:  # pylint: disable=R0903
         result = dict()
         try:
             mapper = importlib.import_module(f"engine.mappers.{target}")
-            result = mapper.info(self.settings)
+            result = mapper.info(self.settings, scope)
         except:  # pylint: disable=W0702
             log.exception("Failed to map info data")
         return result
