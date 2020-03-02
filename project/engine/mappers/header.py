@@ -35,11 +35,11 @@ def auth(settings, scope):
         )
     #
     auth_info = info(settings, scope)
-    for header, path in settings["mappers"]["header"][scope]:
-        try:
+    try:
+        for header, path in settings["mappers"]["header"][scope].items():
             cherrypy.response.headers[header] = jsonpath_rw.parse(path).find(auth_info)[0].value
-        except:  # pylint: disable=W0702
-            log.exception("Failed to set scope header")
+    except:  # pylint: disable=W0702
+        log.exception("Failed to set scope headers")
     #
     return "OK"
 
