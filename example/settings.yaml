@@ -49,6 +49,7 @@ server:
 endpoints:
   root: "/"
   saml: "/saml"
+  oidc: "/oidc"
   info: "/info"
   access_denied: "/access_denied"
 

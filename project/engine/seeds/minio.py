@@ -21,7 +21,7 @@
 """
 
 import base64
-import yaml
+import yaml  # pylint: disable=E0401
 import minio  # pylint: disable=E0401
 import urllib3  # pylint: disable=E0401
 

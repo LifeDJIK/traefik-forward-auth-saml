@@ -23,7 +23,7 @@
 import os
 import re
 
-import hvac
+import hvac  # pylint: disable=E0401
 
 from engine.tools import log
 
