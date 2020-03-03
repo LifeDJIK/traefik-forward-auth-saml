@@ -17,7 +17,7 @@
 #   limitations under the License.
 
 """
-    Mapper: header
+    Mapper: json
 """
 
 import urllib
@@ -30,29 +30,29 @@ from engine.tools import log
 
 def auth(scope):
     """ Map auth data """
-    if scope not in cherrypy.config["engine.settings"]["mappers"]["header"]:
-        raise cherrypy.HTTPRedirect(
-            cherrypy.config["engine.settings"]["endpoints"]["access_denied"]
-        )
-    # Set "raw" headers too
     cherrypy.response.headers["X-Auth-Session-Endpoint"] = \
         cherrypy.request.base + cherrypy.config["engine.settings"]["endpoints"]["info"] + \
-        f"/query?target=header&scope={urllib.parse.quote_plus(scope)}"
+        f"/query?target=json&scope={urllib.parse.quote_plus(scope)}"
     cherrypy.response.headers["X-Auth-Session-Name"] = cherrypy.serving.request.config.get(
         "tools.sessions.name",
         "session_id"
     )
     cherrypy.response.headers["X-Auth-Session-Id"] = cherrypy.session.id
-    # Set mapped headers
-    auth_info = info(scope)
-    try:
-        for header, path in cherrypy.config["engine.settings"]["mappers"]["header"][scope].items():
-            cherrypy.response.headers[header] = jsonpath_rw.parse(path).find(auth_info)[0].value
-    except:  # pylint: disable=W0702
-        log.exception("Failed to set scope headers")
     return "OK"
 
 
 def info(scope):
     """ Map info data """
-    return raw.info(scope)
+    if scope not in cherrypy.config["engine.settings"]["mappers"]["json"]:
+        raise cherrypy.HTTPRedirect(
+            cherrypy.config["engine.settings"]["endpoints"]["access_denied"]
+        )
+    auth_info = raw.info(scope)
+    result = dict()
+    result["raw"] = auth_info
+    try:
+        for key, path in cherrypy.config["engine.settings"]["mappers"]["json"][scope].items():
+            result[key] = jsonpath_rw.parse(path).find(auth_info)[0].value
+    except:  # pylint: disable=W0702
+        log.exception("Failed to set scope data")
+    return result

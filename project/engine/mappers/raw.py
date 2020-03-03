@@ -20,14 +20,15 @@
     Mapper: raw
 """
 
+import urllib
 import cherrypy  # pylint: disable=E0401
 
 
 def auth(scope):
     """ Map auth data """
-    _ = scope
     cherrypy.response.headers["X-Auth-Session-Endpoint"] = \
-        cherrypy.request.base + cherrypy.config["engine.settings"]["endpoints"]["info"] + "/query"
+        cherrypy.request.base + cherrypy.config["engine.settings"]["endpoints"]["info"] + \
+        f"/query?target=raw&scope={urllib.parse.quote_plus(scope)}"
     cherrypy.response.headers["X-Auth-Session-Name"] = cherrypy.serving.request.config.get(
         "tools.sessions.name",
         "session_id"
