@@ -140,27 +140,26 @@ class SamlController:  # pylint: disable=R0903
         request = OneLogin_Saml2_Utils.b64encode(etree.tostring(request_root))
         return request
 
-    @staticmethod
-    def _get_forwarded_header(request, header, default):
-        if header in request.headers:
-            return request.headers[header]
+    def _get_forwarded_header(self, request, header, default):
+        if not self.settings["saml"].get("use_session_headers", False):
+            if header in request.headers:
+                return request.headers[header]
         return cherrypy.session.pop(header, default)
 
-    @staticmethod
-    def _prepare_request_object(request):
-        proto = SamlController._get_forwarded_header(
+    def _prepare_request_object(self, request):
+        proto = self._get_forwarded_header(
             request, "X-Forwarded-Proto",
             request.scheme
         )
-        host = SamlController._get_forwarded_header(
+        host = self._get_forwarded_header(
             request, "X-Forwarded-Host",
             request.headers["Host"] if "Host" in request.headers else ""
         )
-        port = SamlController._get_forwarded_header(
+        port = self._get_forwarded_header(
             request, "X-Forwarded-Port",
             "443" if proto == "https" else "80"
         )
-        script = SamlController._get_forwarded_header(
+        script = self._get_forwarded_header(
             request, "X-Forwarded-Uri",
             request.script_name + request.path_info
         )
