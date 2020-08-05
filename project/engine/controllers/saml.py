@@ -140,11 +140,11 @@ class SamlController:  # pylint: disable=R0903
         request = OneLogin_Saml2_Utils.b64encode(etree.tostring(request_root))
         return request
 
-    def _get_forwarded_header(self, request, header, default):
-        if not self.settings["saml"].get("use_session_headers", False):
-            if header in request.headers:
-                return request.headers[header]
-        return cherrypy.session.pop(header, default)
+    @staticmethod
+    def _get_forwarded_header(request, header, default):
+        if header in request.headers:
+            return request.headers[header]
+        return default
 
     def _prepare_request_object(self, request):
         proto = self._get_forwarded_header(
@@ -176,6 +176,25 @@ class SamlController:  # pylint: disable=R0903
             # "query_string": "",
         }
 
+    def _build_redirect_url(self):
+        #
+        for header in [
+                "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port", "X-Forwarded-Uri"
+        ]:
+            if header not in cherrypy.session:
+                return self.settings["auth"]["login_default_redirect_url"]
+        #
+        proto = cherrypy.session.pop("X-Forwarded-Proto")
+        host = cherrypy.session.pop("X-Forwarded-Host")
+        port = cherrypy.session.pop("X-Forwarded-Port")
+        if (proto == "http" and port != "80") or (proto == "https" and port != "443"):
+            port = f":{port}"
+        else:
+            port = ""
+        uri = cherrypy.session.pop("X-Forwarded-Uri")
+        #
+        return f"{proto}://{host}{port}{uri}"
+
     #
     # Login/logout endpoints
     #
@@ -188,7 +207,7 @@ class SamlController:  # pylint: disable=R0903
             self._prepare_request_object(cherrypy.request),
             self.settings["saml"]
         )
-        login_redirect_url = saml_auth.login()
+        login_redirect_url = saml_auth.login(return_to=self._build_redirect_url())
         # Redirect in case of HTTP-REDIRECT binding
         if self.settings["saml"]["idp"]["singleSignOnService"]["binding"] != \
                 "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST":
